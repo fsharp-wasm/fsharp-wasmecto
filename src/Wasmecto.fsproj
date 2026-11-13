@@ -19,6 +19,6 @@
   </ItemGroup>
   <!-- Reference fsharp-wasm-core for BCL stubs (no NuGet needed — WasmGC only) -->
   <ItemGroup>
-    <ProjectReference Include="../../fsharp-wasm-core/FSharp.Wasm.Core/FSharp.WasmCore.fsproj" />
+    <ProjectReference Include="../../fsharp-wasm-core/FSharp.Wasm.Core/FSharp.Wasm.Core.fsproj" />
   </ItemGroup>
 </Project>

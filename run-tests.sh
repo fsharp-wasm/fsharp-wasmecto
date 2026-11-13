@@ -14,7 +14,7 @@ mkdir -p "$OUT"
 # The test project reaches fsharp-wasm-core through a ProjectReference. FCS wants the
 # reference assembly (obj/<cfg>/<tfm>/ref/*.dll) on disk, so build it first.
 echo "==> Building project references (reference assemblies)..."
-dotnet build "$FSHARP_WASM/fsharp-wasm-core/FSharp.Wasm.Core/FSharp.WasmCore.fsproj" \
+dotnet build "$FSHARP_WASM/fsharp-wasm-core/FSharp.Wasm.Core/FSharp.Wasm.Core.fsproj" \
     -c Release --nologo -v q
 
 echo "==> Compiling Wasmecto + tests via fsharp-wasm..."
