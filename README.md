@@ -5,11 +5,15 @@ a test of the base library is checked in the environment where the library runs,
 
 ```fsharp
 open Wasmecto
+open System.Collections.Generic
 
-[<Tests>]
 let tests =
-    testList "Stack" [
-        test "push then pop" { Expect.equal (pop (push 1 empty)) (Some 1) "the pushed value comes back" }
+    testList "Stack<T>" [
+        testCase "Push / Pop LIFO" <| fun () ->
+            let s = Stack<int>()
+            s.Push 1; s.Push 2
+            Expect.equal (s.Pop()) 2 "pop 2"
+            Expect.equal (s.Pop()) 1 "pop 1"
     ]
 ```
 
@@ -21,7 +25,7 @@ and async. Wasmecto is a small subset (about 470 lines) that needs none of them;
 
 | file | what it is |
 |---|---|
-| `src/DSL.fs`, `src/Types.fs` | `testList`, `test`, the test and result types |
+| `src/DSL.fs`, `src/Types.fs` | `testList`, `testCase` (and `test`), pending and focused variants; the test and result types |
 | `src/Expect.fs` | the assertions (`Expect.equal`, …) |
 | `src/Runner.fs`, `src/ExnState.fs` | the runner and its exception state |
 | `runtime/test-runner.js` | a host that instantiates the module, runs it and exits with the number of failures |
