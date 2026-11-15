@@ -22,17 +22,29 @@ let inline private fail (msg: string) =
     ExnState.Msg  <- msg
     raise (FailException msg)
 
+/// A value as a failure message shows it. Strings and the number types are printed; a record, union, list or tuple is not
+/// (the compiler has no structural `%A` yet: it rejects it at compile time instead of printing something else), so those
+/// show as `<value>`. The comparison itself is structural either way.
+let private show (x: 'a) : string =
+    match box x with
+    | :? string as s -> "\"" + s + "\""
+    | :? int as i -> string i
+    | :? int64 as i -> string i
+    | :? float as f -> string f
+    | :? bool as b -> if b then "true" else "false"
+    | _ -> "<value>"
+
 let inline private failtestf fmt = Printf.ksprintf fail fmt
 
 // ─── Equality ─────────────────────────────────────────────────────────────────
 
 let equal (actual: 'a) (expected: 'a) (msg: string) =
     if actual <> expected then
-        fail (sprintf "%s.\n  Expected: %A\n  Actual:   %A" msg expected actual)
+        fail (sprintf "%s.\n  Expected: %s\n  Actual:   %s" msg (show expected) (show actual))
 
 let notEqual (actual: 'a) (expected: 'a) (msg: string) =
     if actual = expected then
-        fail (sprintf "%s. Did not expect: %A" msg actual)
+        fail (sprintf "%s. Did not expect: %s" msg (show actual))
 
 // ─── Boolean ──────────────────────────────────────────────────────────────────
 
@@ -46,7 +58,7 @@ let isFalse (actual: bool) (msg: string) =
 
 let isNull (actual: obj) (msg: string) =
     if not (obj.ReferenceEquals(actual, null)) then
-        fail (sprintf "%s. Expected null but got: %A" msg actual)
+        fail (sprintf "%s. Expected null but got: %s" msg (show actual))
 
 let isNotNull (actual: obj) (msg: string) =
     if obj.ReferenceEquals(actual, null) then
@@ -73,7 +85,7 @@ let wantOk (r: Result<'a,'e>) (msg: string) : 'a =
     match r with
     | Ok v    -> v
     | Error e ->
-        fail (sprintf "%s. Expected Ok but got Error: %A." msg e)
+        fail (sprintf "%s. Expected Ok but got Error: %s." msg (show e))
         Unchecked.defaultof<'a>
 
 // ─── Exception ────────────────────────────────────────────────────────────────
@@ -144,7 +156,7 @@ let sequenceEqual (actual: 'a seq) (expected: 'a seq) (msg: string) =
     let al = Seq.toList actual
     let el = Seq.toList expected
     if al <> el then
-        fail (sprintf "%s.\n  Expected: %A\n  Actual:   %A" msg el al)
+        fail (sprintf "%s.\n  Expected: %s\n  Actual:   %s" msg (show el) (show al))
 
 // TODO: we use list till seq is supported in the compiler
 // let isEmpty (actual: 'a seq) (msg: string) =
@@ -181,19 +193,19 @@ let approxEqual (actual: float) (expected: float) (epsilon: float) (msg: string)
 
 let isLessThan (actual: 'a when 'a: comparison) (limit: 'a) (msg: string) =
     if not (actual < limit) then
-        fail (sprintf "%s. Expected %A < %A." msg actual limit)
+        fail (sprintf "%s. Expected %s < %s." msg (show actual) (show limit))
 
 let isGreaterThan (actual: 'a when 'a: comparison) (limit: 'a) (msg: string) =
     if not (actual > limit) then
-        fail (sprintf "%s. Expected %A > %A." msg actual limit)
+        fail (sprintf "%s. Expected %s > %s." msg (show actual) (show limit))
 
 let isLessThanOrEqual (actual: 'a when 'a: comparison) (limit: 'a) (msg: string) =
     if not (actual <= limit) then
-        fail (sprintf "%s. Expected %A ≤ %A." msg actual limit)
+        fail (sprintf "%s. Expected %s ≤ %s." msg (show actual) (show limit))
 
 let isGreaterThanOrEqual (actual: 'a when 'a: comparison) (limit: 'a) (msg: string) =
     if not (actual >= limit) then
-        fail (sprintf "%s. Expected %A ≥ %A." msg actual limit)
+        fail (sprintf "%s. Expected %s ≥ %s." msg (show actual) (show limit))
 
 // ─── Array / sequence helpers ─────────────────────────────────────────────────
 
@@ -203,12 +215,12 @@ let arrayEqual (actual: 'a[]) (expected: 'a[]) (msg: string) =
     let mutable i = 0
     while i < actual.Length do
         if actual.[i] <> expected.[i] then
-            fail (sprintf "%s. Mismatch at index %d: expected %A, got %A." msg i expected.[i] actual.[i])
+            fail (sprintf "%s. Mismatch at index %d: expected %s, got %s." msg i (show expected.[i]) (show actual.[i]))
         i <- i + 1
 
 let listEqual (actual: 'a list) (expected: 'a list) (msg: string) =
     if actual <> expected then
-        fail (sprintf "%s.\n  Expected: %A\n  Actual:   %A" msg expected actual)
+        fail (sprintf "%s.\n  Expected: %s\n  Actual:   %s" msg (show expected) (show actual))
 
 // ─── Convenience ─────────────────────────────────────────────────────────────
 

@@ -1,8 +1,9 @@
 /// Test runner — flattens the tree, executes sequentially, emits TAP 13.
-/// WasmGC-compatible version: no reflection, no async, no Fable.Core dependency.
+/// WasmGC-compatible version: no reflection, no async; Fable.Core only for the one host import (`wasmecto.writeLine`).
 /// Exception handling via ExnState (module-level mutable) rather than typed catch.
 module Wasmecto.Runner
 
+open Fable.Core
 open Wasmecto
 
 // ─── Private: flat test record ───────────────────────────────────────────────
@@ -139,17 +140,19 @@ let private registry = System.Collections.Generic.List<Test>()
 let register (tests: Test list) =
     for t in tests do registry.Add(t)
 
-/// Called by the WasmGC JS harness after WASM module init.
-/// Exported as "wasmecto_run" — writeLine is a JS import.
-/// writeLine is imported from the host environment.
-[<CompiledName("wasmecto_run")>]
-let wasmecto_run (writeLine: string -> unit) : int =
-    //     runAll writeLine (System.Collections.Generic.List.ofSeq registry)
+/// The host's `writeLine`: the module imports it as `wasmecto.writeLine` (a string in, nothing out), so the runner
+/// needs no closure parameter (an exported `wasmecto_run` that took the printer as an F# function could not be called from a host).
+[<Import("writeLine", "wasmecto")>]
+let hostWriteLine (line: string) : unit = nativeOnly
 
+/// Runs every registered suite, printing TAP through `wasmecto.writeLine`; the result is the number of failures (0 = all passed).
+/// Call it after module initialisation, which is when `register` has run. A compiled module exports only the functions of its
+/// last file, so the test project's last file wraps this: `let wasmecto_run () : int = Wasmecto.Runner.runRegistered ()`.
+let runRegistered () : int =
     // Convert List<Test> to F# list without List.ofSeq (BCL gap)
     let mutable acc = []
     let mutable i = registry.Count - 1
     while i >= 0 do
         acc <- registry.[i] :: acc
         i <- i - 1
-    runAll writeLine acc
+    runAll hostWriteLine acc

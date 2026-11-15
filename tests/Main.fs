@@ -1,7 +1,6 @@
 /// Entry point — register all test modules.
-/// The canonical WASM export `wasmecto_run` is defined in Wasmecto.Runner
-/// and automatically compiled into the output; this module just populates
-/// the registry before that export is called.
+/// A compiled module exports the functions of its last file, so this file exports `wasmecto_run`
+/// (the host calls it; the module's initialiser has registered the suites by then).
 module WasmTests.Main
 
 open Wasmecto
@@ -19,3 +18,5 @@ do
         StackTests.tests
         StringBuilderTests.tests
     ]
+
+let wasmecto_run () : int = runRegistered ()

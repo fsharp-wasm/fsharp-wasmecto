@@ -17,8 +17,11 @@
     <Compile Include="DSL.fs" />
     <Compile Include="Runner.fs" />
   </ItemGroup>
-  <!-- Reference fsharp-wasm-core for BCL stubs (no NuGet needed — WasmGC only) -->
+  <!-- Reference fsharp-wasm-core for BCL stubs (no NuGet needed — WasmGC only): a sibling checkout, or FSHARP_WASM_CORE_DIR -->
+  <PropertyGroup>
+    <FSHARP_WASM_CORE_DIR Condition="'$(FSHARP_WASM_CORE_DIR)' == ''">$(MSBuildThisFileDirectory)../../fsharp-wasm-core</FSHARP_WASM_CORE_DIR>
+  </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../fsharp-wasm-core/FSharp.Wasm.Core/FSharp.Wasm.Core.fsproj" />
+    <ProjectReference Include="$(FSHARP_WASM_CORE_DIR)/FSharp.Wasm.Core/FSharp.Wasm.Core.fsproj" />
   </ItemGroup>
 </Project>

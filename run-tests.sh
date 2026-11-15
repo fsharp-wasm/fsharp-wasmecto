@@ -1,35 +1,30 @@
 #!/usr/bin/env bash
-# run-tests.sh — compile and run Wasmecto tests via wasmtime
-# Usage: ./run-tests.sh [test-project-dir]
+# Compile Wasmecto's own tests with the fsharp-wasm compiler and run them in Node.
+#
+#   ./run-tests.sh
+#
+# Needs checkouts of fsharp-wasm (the compiler) and fsharp-wasm-core next to this repository;
+# FSHARP_WASM and FSHARP_WASM_CORE_DIR say where they are if they are somewhere else.
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="$SCRIPT_DIR"
-FSHARP_WASM="${FSHARP_WASM:-$ROOT/..}"
-TEST_PROJ="${1:-$ROOT/tests}"
-OUT="$ROOT/dist"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FSHARP_WASM="${FSHARP_WASM:-$HERE/../fsharp-wasm}"
+CORE="${FSHARP_WASM_CORE_DIR:-$HERE/../fsharp-wasm-core}"
+OUT="$HERE/dist"
 
-mkdir -p "$OUT"
+[ -d "$FSHARP_WASM/tools/FSharp.Wasm.Cli" ] || { echo "fsharp-wasm not found at $FSHARP_WASM (set FSHARP_WASM)" >&2; exit 2; }
+[ -d "$CORE/FSharp.Wasm.Core" ]             || { echo "fsharp-wasm-core not found at $CORE (set FSHARP_WASM_CORE_DIR)" >&2; exit 2; }
 
-# The test project reaches fsharp-wasm-core through a ProjectReference. FCS wants the
-# reference assembly (obj/<cfg>/<tfm>/ref/*.dll) on disk, so build it first.
-echo "==> Building project references (reference assemblies)..."
-dotnet build "$FSHARP_WASM/fsharp-wasm-core/FSharp.Wasm.Core/FSharp.Wasm.Core.fsproj" \
-    -c Release --nologo -v q
+# The tests reach fsharp-wasm-core through a ProjectReference; the front end wants its reference assembly on disk.
+echo "==> Building the project references (reference assemblies)..."
+dotnet build "$CORE/FSharp.Wasm.Core/FSharp.Wasm.Core.fsproj" -c Release --nologo -v q
 
-echo "==> Compiling Wasmecto + tests via fsharp-wasm..."
-dotnet run --project "$FSHARP_WASM/tools/FSharp.Wasm.Cli" -- \
-    "$TEST_PROJ/WasmTests.fsproj" \
-    --outDir "$OUT"
+echo "==> Compiling Wasmecto and its tests with fsharp-wasm..."
+rm -rf "$OUT"
+dotnet run -c Release --project "$FSHARP_WASM/tools/FSharp.Wasm.Cli" -- "$HERE/tests/WasmTests.fsproj" --outDir "$OUT" --noCache
 
-echo "==> Running tests in wasmtime..."
-STATUS=0
-wasmtime run "$OUT/wasmtests.wasm" 2>&1 || STATUS=$?
+WASM="$(ls "$OUT"/*.wasm | head -1)"
+command -v wasm-tools >/dev/null && wasm-tools validate "$WASM" --features gc
 
-if [ "$STATUS" -eq 0 ]; then
-    echo "All tests passed."
-else
-    echo "FAILED: exit code $STATUS."
-fi
-
-exit "$STATUS"
+echo "==> Running $(basename "$WASM") in Node..."
+node "$FSHARP_WASM/tests/Wasm/run.mjs" "$WASM"
