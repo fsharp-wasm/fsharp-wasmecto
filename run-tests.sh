@@ -3,13 +3,15 @@
 #
 #   ./run-tests.sh
 #
-# Needs checkouts of fsharp-wasm (the compiler) and fsharp-wasm-core next to this repository;
+# Needs a checkout of fsharp-wasm (the compiler) next to this repository, with its submodules (core);
 # FSHARP_WASM and FSHARP_WASM_CORE_DIR say where they are if they are somewhere else.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FSHARP_WASM="${FSHARP_WASM:-$HERE/../fsharp-wasm}"
-CORE="${FSHARP_WASM_CORE_DIR:-$HERE/../fsharp-wasm-core}"
+# the base library: the compiler's `core` submodule (the revision it is built and tested with), or a sibling checkout
+CORE="${FSHARP_WASM_CORE_DIR:-$FSHARP_WASM/core}"
+[ -d "$CORE/FSharp.Wasm.Core" ] || CORE="$HERE/../fsharp-wasm-core"
 OUT="$HERE/dist"
 
 [ -d "$FSHARP_WASM/tools/FSharp.Wasm.Cli" ] || { echo "fsharp-wasm not found at $FSHARP_WASM (set FSHARP_WASM)" >&2; exit 2; }
