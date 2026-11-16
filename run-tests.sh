@@ -12,6 +12,7 @@ FSHARP_WASM="${FSHARP_WASM:-$HERE/../fsharp-wasm}"
 # the base library: the compiler's `core` submodule (the revision it is built and tested with), or a sibling checkout
 CORE="${FSHARP_WASM_CORE_DIR:-$FSHARP_WASM/core}"
 [ -d "$CORE/FSharp.Wasm.Core" ] || CORE="$HERE/../fsharp-wasm-core"
+export FSHARP_WASM_CORE_DIR="$CORE"          # the project reference of src/Wasmecto.fsproj follows it
 OUT="$HERE/dist"
 
 [ -d "$FSHARP_WASM/tools/FSharp.Wasm.Cli" ] || { echo "fsharp-wasm not found at $FSHARP_WASM (set FSHARP_WASM)" >&2; exit 2; }
