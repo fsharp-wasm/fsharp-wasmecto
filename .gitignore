@@ -51,4 +51,7 @@ CodeCoverage/
 # NUnit
 *.VisualState.xml
 TestResult.xml
-nunit-*.xmldist/
+nunit-*.xml
+
+# the output of run-tests.sh
+dist/
