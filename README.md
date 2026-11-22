@@ -1,5 +1,9 @@
 # fsharp-wasmecto
 
+<!-- platform -->
+> **Part of the [fsharp-wasm platform](https://fsharp-wasm.github.io/projects/)**: tests. Builds on the compiler ([fsharp-wasm](https://github.com/fsharp-wasm/fsharp-wasm)). Used by [core](https://github.com/fsharp-wasm/fsharp-wasm-core), [fsharp-wasm](https://github.com/fsharp-wasm/fsharp-wasm).
+> [All projects](https://fsharp-wasm.github.io/projects/) · [Roadmap](https://fsharp-wasm.github.io/docs/roadmap/) · [Tests](https://fsharp-wasm.github.io/tests/) · [Benchmarks](https://fsharp-wasm.github.io/benchmarks/) · [Live demos](https://fsharp-wasm.github.io/demos/)
+
 **An Expecto-style test framework in F#, compiled to WebAssembly GC.** Tests are written with `testList` / `test` and run *inside* a WebAssembly GC engine, so
 a test of the base library is checked in the environment where the library runs, not only under .NET.
 
