@@ -41,6 +41,15 @@ and async. Wasmecto is a small subset (about 470 lines) that needs none of them;
 directory); in the current layout it does not run, and the tests that use the framework are not run by any CI. The base library's own tests currently run under .NET with Expecto
 (`fsharp-wasm-core/tests`, 90 tests). Bringing this runner up to date is on the [roadmap](https://fsharp-wasm.github.io/docs/roadmap) ("tests that run everywhere").
 
+## Contributing
+
+Welcome. [CONTRIBUTING](https://github.com/fsharp-wasm/.github/blob/develop/CONTRIBUTING.md) is the organisation's guide and [AGENTS.md](AGENTS.md) says how the platform is worked on (the compiler comes first: a fault found here
+is fixed in the compiler, not worked around here).
+
+- **Run the tests:** `bash run-tests.sh` compiles Wasmecto's own tests with the compiler (a checkout of fsharp-wasm next to this one) and runs them in Node.
+- **A good first contribution:** An assertion helper that Expecto has and this lacks. Issues labelled [`good first issue`](https://github.com/fsharp-wasm/fsharp-wasmecto/labels/good%20first%20issue) are the places to start.
+- **A change** goes to `develop` as a pull request, with a test that fails without it. Open an issue first for anything larger than a fix.
+
 ## License
 
 [Apache License 2.0](LICENSE); see [NOTICE](NOTICE).
